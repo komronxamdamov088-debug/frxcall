@@ -31,7 +31,7 @@ npm run dev
 
 ```bash
 cd frontend && npm run build
-cd ../backend && npm run build && NODE_ENV=production npm start
+cd ../backend && npm run compile && NODE_ENV=production npm start
 ```
 Backend `frontend/dist` ni o'zi beradi — hammasi `http://server:4000` da ishlaydi.
 
