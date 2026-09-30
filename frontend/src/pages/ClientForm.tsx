@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useLang } from '../context/LangContext';
 import { api } from '../lib/api';
 import type { Client, ClientInput, ClientStatus } from '../lib/types';
-import { Button, ErrorText, Field, Input, Modal, Textarea, statusStyles } from '../components/ui';
+import { Button, ErrorText, Field, Input, Modal, ModalActions, Textarea, statusStyles } from '../components/ui';
 
 const STATUSES: ClientStatus[] = ['waiting', 'confirmed', 'cancelled'];
 
@@ -72,7 +72,7 @@ export default function ClientForm({
                 type="button"
                 key={s}
                 onClick={() => set('status', s)}
-                className={`rounded-lg px-2 py-2 text-xs font-medium ring-1 transition sm:text-sm ${
+                className={`rounded-lg px-1 py-2.5 text-xs leading-tight font-medium ring-1 transition sm:text-sm ${
                   form.status === s ? statusStyles[s].badge + ' ring-2' : 'text-slate-500 ring-slate-200 hover:bg-slate-50'
                 }`}
               >
@@ -94,14 +94,14 @@ export default function ClientForm({
         )}
 
         <ErrorText>{error ? errorText(error) : null}</ErrorText>
-        <div className="flex justify-end gap-2 pt-2">
+        <ModalActions>
           <Button type="button" variant="secondary" onClick={onClose}>
             {t('cancel')}
           </Button>
           <Button type="submit" disabled={busy}>
             {t('save')}
           </Button>
-        </div>
+        </ModalActions>
       </form>
     </Modal>
   );

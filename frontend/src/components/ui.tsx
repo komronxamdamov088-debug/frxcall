@@ -35,7 +35,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 const inputCls =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100';
+  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base outline-none sm:text-sm transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100';
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={inputCls} {...props} />;
@@ -47,14 +47,14 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
 
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
+        className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl sm:rounded-2xl sm:p-6"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <h2 className="min-w-0 text-lg font-semibold break-words">{title}</h2>
+          <button onClick={onClose} className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
             <X size={20} />
           </button>
         </div>
@@ -98,6 +98,11 @@ export function LangSwitch() {
       ))}
     </div>
   );
+}
+
+/** Modal pastidagi tugmalar: mobilda teng bo'lib cho'ziladi. */
+export function ModalActions({ children }: { children: ReactNode }) {
+  return <div className="flex gap-2 pt-2 *:flex-1 sm:justify-end sm:*:flex-none">{children}</div>;
 }
 
 export function ErrorText({ children }: { children: ReactNode }) {

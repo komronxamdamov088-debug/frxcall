@@ -11,4 +11,13 @@
 
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Gorizontal tab qatorida scrollbar ko'rinmasin */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
