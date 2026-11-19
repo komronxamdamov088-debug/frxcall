@@ -1,4 +1,4 @@
-import { BarChart3, FileText, PhoneCall, Users } from 'lucide-react';
+import { BarChart3, FileText, PhoneCall, Users, UtensilsCrossed } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 
@@ -7,6 +7,7 @@ const ITEMS = [
   { to: '/calls', key: 'navCalls', icon: PhoneCall, end: false },
   { to: '/scripts', key: 'navScripts', icon: FileText, end: false },
   { to: '/stats', key: 'navStats', icon: BarChart3, end: false },
+  { to: '/restaurants', key: 'navRestaurants', icon: UtensilsCrossed, end: false },
 ] as const;
 
 export default function NavTabs() {

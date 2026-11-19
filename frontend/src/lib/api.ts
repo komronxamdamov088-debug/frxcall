@@ -1,4 +1,4 @@
-import type { Call, CallDirection, CallInput, CallOutcome, CallStats, Client, ClientInput, ClientStatus, Stats, User } from './types';
+import type { Call, CallDirection, CallInput, CallOutcome, CallStats, CallStatus, CallType, Client, ClientInput, ClientStatus, Stats, User } from './types';
 
 const TOKEN_KEY = 'frx_phone_token';
 
@@ -87,14 +87,18 @@ export const api = {
     }),
   deleteClient: (id: number) => request<void>(`/clients/${id}`, { method: 'DELETE' }),
 
-  calls: (params: { direction?: CallDirection; outcome?: CallOutcome; q?: string }) => {
+  calls: (params: { direction?: CallDirection; outcome?: CallOutcome; status?: CallStatus; call_type?: CallType; q?: string }) => {
     const qs = new URLSearchParams();
     if (params.direction) qs.set('direction', params.direction);
     if (params.outcome) qs.set('outcome', params.outcome);
+    if (params.status) qs.set('status', params.status);
+    if (params.call_type) qs.set('call_type', params.call_type);
     if (params.q) qs.set('q', params.q);
     return request<{ calls: Call[] }>(`/calls?${qs}`);
   },
   callStats: () => request<CallStats>('/calls/stats'),
   createCall: (body: CallInput) => request<{ call: Call }>('/calls', { method: 'POST', body: json(body) }),
+  setCallStatus: (id: number, status: CallStatus) =>
+    request<{ call: Call }>(`/calls/${id}/status`, { method: 'PATCH', body: json({ status }) }),
   deleteCall: (id: number) => request<void>(`/calls/${id}`, { method: 'DELETE' }),
 };

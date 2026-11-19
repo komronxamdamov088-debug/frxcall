@@ -42,6 +42,12 @@ const SCHEMA = [
      created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
   `CREATE INDEX IF NOT EXISTS idx_calls_created ON calls(created_at DESC)`,
+  `ALTER TABLE calls ADD COLUMN IF NOT EXISTS call_type TEXT NOT NULL DEFAULT 'lead'`,
+  `ALTER TABLE calls ADD COLUMN IF NOT EXISTS biz_type TEXT`,
+  `ALTER TABLE calls ADD COLUMN IF NOT EXISTS lang TEXT NOT NULL DEFAULT 'uz'`,
+  `ALTER TABLE calls ADD COLUMN IF NOT EXISTS next_step TEXT`,
+  `ALTER TABLE calls ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'new'`,
+  `ALTER TABLE calls ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`,
 ];
 
 // Har bir serverless instansiya birinchi so'rovda jadvallar borligiga ishonch hosil qiladi.

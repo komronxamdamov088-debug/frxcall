@@ -6,6 +6,7 @@ import ClientsPage from './pages/ClientsPage';
 import CallsPage from './pages/CallsPage';
 import ScriptsPage from './pages/ScriptsPage';
 import StatsPage from './pages/StatsPage';
+import RestaurantsPage from './pages/RestaurantsPage';
 
 function Gate() {
   const { user, ready } = useAuth();
@@ -17,6 +18,7 @@ function Gate() {
       <Route path="/calls" element={user ? <CallsPage /> : <Navigate to="/login" replace />} />
       <Route path="/scripts" element={user ? <ScriptsPage /> : <Navigate to="/login" replace />} />
       <Route path="/stats" element={user ? <StatsPage /> : <Navigate to="/login" replace />} />
+      <Route path="/restaurants" element={user ? <RestaurantsPage /> : <Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

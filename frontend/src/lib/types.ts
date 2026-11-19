@@ -35,6 +35,9 @@ export type Stats = Record<ClientStatus | 'all', number>;
 
 export type CallDirection = 'in' | 'out';
 export type CallOutcome = 'answered' | 'no_answer' | 'busy' | 'callback';
+export type CallType = 'lead' | 'support' | 'complaint' | 'partnership' | 'other';
+export type CallStatus = 'new' | 'handed_off' | 'closed';
+export type CallLang = 'uz' | 'ru' | 'en';
 
 export interface Call {
   id: number;
@@ -47,6 +50,11 @@ export interface Call {
   topic: string | null;
   note: string | null;
   operator_name: string | null;
+  call_type: CallType;
+  biz_type: string | null;
+  lang: CallLang;
+  next_step: string | null;
+  status: CallStatus;
   created_at: string;
 }
 
@@ -58,6 +66,11 @@ export interface CallInput {
   duration_min: number;
   topic: string;
   note: string;
+  call_type: CallType;
+  biz_type: string;
+  lang: CallLang;
+  next_step: string;
+  status: CallStatus;
 }
 
 export interface CallStats {
@@ -76,4 +89,6 @@ export interface CallStats {
   operators: { name: string; n: number; today: number }[];
   days: { day: string; n: number }[];
   clients: { status: ClientStatus; n: number }[];
+  types: { call_type: CallType; n: number }[];
+  statuses: { status: CallStatus; n: number }[];
 }

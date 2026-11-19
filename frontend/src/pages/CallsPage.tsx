@@ -1,18 +1,13 @@
 import { PhoneCall, PhoneIncoming, PhoneOutgoing, Plus, Search, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { Button, ErrorText, Field, Input, Modal, ModalActions, Textarea } from '../components/ui';
+import { Button, ErrorText, Modal, ModalActions } from '../components/ui';
+import { CallFormModal } from '../components/CallForm';
+import { OUTCOME_KEY, STATUS_KEY, STATUS_STYLE, TYPE_KEY, fmtDuration, selectCls } from '../lib/callMeta';
 import { useLang } from '../context/LangContext';
 import { api } from '../lib/api';
 import { formatDate } from '../lib/format';
-import type { Call, CallDirection, CallInput, CallOutcome } from '../lib/types';
-
-export const OUTCOME_KEY = {
-  answered: 'outAnswered',
-  no_answer: 'outNoAnswer',
-  busy: 'outBusy',
-  callback: 'outCallback',
-} as const;
+import type { Call, CallDirection, CallOutcome, CallStatus, CallType } from '../lib/types';
 
 const OUTCOME_STYLE: Record<CallOutcome, string> = {
   answered: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
@@ -21,20 +16,12 @@ const OUTCOME_STYLE: Record<CallOutcome, string> = {
   callback: 'bg-blue-50 text-blue-700 ring-blue-200',
 };
 
-const selectCls =
-  'rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base outline-none sm:py-2 sm:text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100';
-
-export function fmtDuration(sec: number, t: (k: 'min' | 'sec') => string) {
-  if (!sec) return '—';
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return m ? `${m} ${t('min')}${s ? ` ${s} ${t('sec')}` : ''}` : `${s} ${t('sec')}`;
-}
-
 export default function CallsPage() {
   const { t, lang, errorText } = useLang();
   const [direction, setDirection] = useState<CallDirection | ''>('');
   const [outcome, setOutcome] = useState<CallOutcome | ''>('');
+  const [status, setStatus] = useState<CallStatus | ''>('');
+  const [ctype, setCtype] = useState<CallType | ''>('');
   const [q, setQ] = useState('');
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,14 +32,14 @@ export default function CallsPage() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const r = await api.calls({ direction: direction || undefined, outcome: outcome || undefined, q });
+      const r = await api.calls({ direction: direction || undefined, outcome: outcome || undefined, status: status || undefined, call_type: ctype || undefined, q });
       setCalls(r.calls);
     } catch (err) {
       setError(err);
     } finally {
       setLoading(false);
     }
-  }, [direction, outcome, q]);
+  }, [direction, outcome, status, ctype, q]);
 
   useEffect(() => {
     const id = setTimeout(load, q ? 250 : 0);
@@ -81,6 +68,22 @@ export default function CallsPage() {
           {(Object.keys(OUTCOME_KEY) as CallOutcome[]).map((o) => (
             <option key={o} value={o}>
               {t(OUTCOME_KEY[o])}
+            </option>
+          ))}
+        </select>
+        <select className={selectCls} value={status} onChange={(e) => setStatus(e.target.value as CallStatus | '')}>
+          <option value="">{t('stAll')}</option>
+          {(Object.keys(STATUS_KEY) as CallStatus[]).map((k) => (
+            <option key={k} value={k}>
+              {t(STATUS_KEY[k])}
+            </option>
+          ))}
+        </select>
+        <select className={selectCls} value={ctype} onChange={(e) => setCtype(e.target.value as CallType | '')}>
+          <option value="">{t('typeAll')}</option>
+          {(Object.keys(TYPE_KEY) as CallType[]).map((k) => (
+            <option key={k} value={k}>
+              {t(TYPE_KEY[k])}
             </option>
           ))}
         </select>
@@ -138,6 +141,36 @@ export default function CallsPage() {
                 </p>
               )}
               {c.note && <p className="mt-1 text-sm break-words whitespace-pre-line text-slate-700">{c.note}</p>}
+              <p className="mt-2 text-xs text-slate-500">
+                {t(TYPE_KEY[c.call_type])}
+                {c.biz_type ? ` · ${c.biz_type}` : ''} · {c.lang}
+              </p>
+              {c.next_step && (
+                <p className="mt-1 text-sm break-words">
+                  <span className="text-slate-500">{t('nextLabel')}:</span> {c.next_step}
+                </p>
+              )}
+              <div className="mt-3">
+                <select
+                  value={c.status}
+                  onChange={async (e) => {
+                    try {
+                      await api.setCallStatus(c.id, e.target.value as CallStatus);
+                      load();
+                    } catch (err) {
+                      setError(err);
+                    }
+                  }}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ring-1 outline-none ${STATUS_STYLE[c.status]}`}
+                  aria-label={t('callStatus')}
+                >
+                  {(Object.keys(STATUS_KEY) as CallStatus[]).map((k) => (
+                    <option key={k} value={k}>
+                      {t(STATUS_KEY[k])}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-400">
                 <span className="min-w-0 truncate">
                   {c.operator_name ?? '—'} · {formatDate(c.created_at, lang)} · {fmtDuration(c.duration_sec, t)}
@@ -161,7 +194,7 @@ export default function CallsPage() {
       )}
 
       {adding && (
-        <CallForm
+        <CallFormModal
           onClose={() => setAdding(false)}
           onSaved={() => {
             setAdding(false);
@@ -197,85 +230,5 @@ export default function CallsPage() {
         </Modal>
       )}
     </Layout>
-  );
-}
-
-function CallForm({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
-  const { t, errorText } = useLang();
-  const [form, setForm] = useState<CallInput>({
-    caller_name: '',
-    phone: '+998 ',
-    direction: 'in',
-    outcome: 'answered',
-    duration_min: 0,
-    topic: '',
-    note: '',
-  });
-  const [error, setError] = useState<unknown>(null);
-  const [busy, setBusy] = useState(false);
-  const set = <K extends keyof CallInput>(k: K, v: CallInput[K]) => setForm((f) => ({ ...f, [k]: v }));
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await api.createCall(form);
-      onSaved();
-    } catch (err) {
-      setError(err);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Modal title={t('addCall')} onClose={onClose}>
-      <form onSubmit={submit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t('fullName')}>
-            <Input value={form.caller_name} onChange={(e) => set('caller_name', e.target.value)} autoFocus />
-          </Field>
-          <Field label={t('phone')}>
-            <Input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} required minLength={5} />
-          </Field>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label={t('direction')}>
-            <select className={selectCls + ' w-full'} value={form.direction} onChange={(e) => set('direction', e.target.value as CallDirection)}>
-              <option value="in">{t('dirIn')}</option>
-              <option value="out">{t('dirOut')}</option>
-            </select>
-          </Field>
-          <Field label={t('outcome')}>
-            <select className={selectCls + ' w-full'} value={form.outcome} onChange={(e) => set('outcome', e.target.value as CallOutcome)}>
-              {(Object.keys(OUTCOME_KEY) as CallOutcome[]).map((o) => (
-                <option key={o} value={o}>
-                  {t(OUTCOME_KEY[o])}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label={t('duration')}>
-            <Input type="number" min={0} max={600} step={0.5} value={form.duration_min} onChange={(e) => set('duration_min', Number(e.target.value))} />
-          </Field>
-        </div>
-        <Field label={t('topic')}>
-          <Input value={form.topic} onChange={(e) => set('topic', e.target.value)} placeholder={t('servicePlaceholder')} />
-        </Field>
-        <Field label={t('note')}>
-          <Textarea value={form.note} onChange={(e) => set('note', e.target.value)} placeholder={t('notePlaceholder')} />
-        </Field>
-        <ErrorText>{error ? errorText(error) : null}</ErrorText>
-        <ModalActions>
-          <Button type="button" variant="secondary" onClick={onClose}>
-            {t('cancel')}
-          </Button>
-          <Button type="submit" disabled={busy}>
-            {t('save')}
-          </Button>
-        </ModalActions>
-      </form>
-    </Modal>
   );
 }

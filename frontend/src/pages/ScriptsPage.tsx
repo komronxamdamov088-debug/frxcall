@@ -1,6 +1,7 @@
 import { Copy, Search, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 import Layout from '../components/Layout';
+import { CallFormBody } from '../components/CallForm';
 import { useLang } from '../context/LangContext';
 import { scripts } from '../lib/scripts';
 
@@ -8,6 +9,7 @@ export default function ScriptsPage() {
   const { t, lang } = useLang();
   const [q, setQ] = useState('');
   const [copied, setCopied] = useState<number | null>(null);
+  const [saved, setSaved] = useState(0);
   const k = q.trim().toLowerCase();
   const list = scripts[lang].filter((s) => !k || `${s.title} ${s.body}`.toLowerCase().includes(k));
 
@@ -23,6 +25,8 @@ export default function ScriptsPage() {
 
   return (
     <Layout>
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="min-w-0">
       <h1 className="text-xl font-bold">{t('scriptsTitle')}</h1>
       <p className="mt-1 mb-4 text-sm text-slate-500">{t('scriptsHint')}</p>
       <div className="relative mb-4 max-w-md">
@@ -37,7 +41,7 @@ export default function ScriptsPage() {
       {list.length === 0 ? (
         <p className="py-12 text-center text-slate-400">{t('noData')}</p>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           {list.map((s, i) => (
             <div
               key={s.title}
@@ -59,6 +63,13 @@ export default function ScriptsPage() {
           ))}
         </div>
       )}
+      </div>
+      <aside className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 lg:sticky lg:top-32">
+        <h2 className="mb-3 font-semibold">{t('formInline')}</h2>
+        <CallFormBody onSaved={() => setSaved((n) => n + 1)} />
+        {saved > 0 && <p className="mt-3 text-sm text-emerald-700">✓ {t('save')}: {saved}</p>}
+      </aside>
+      </div>
     </Layout>
   );
 }

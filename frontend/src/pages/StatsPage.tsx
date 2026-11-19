@@ -4,7 +4,7 @@ import { ErrorText } from '../components/ui';
 import { useLang } from '../context/LangContext';
 import { api } from '../lib/api';
 import type { CallStats } from '../lib/types';
-import { fmtDuration, OUTCOME_KEY } from './CallsPage';
+import { OUTCOME_KEY, STATUS_KEY, TYPE_KEY, fmtDuration } from '../lib/callMeta';
 
 function Kpi({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -81,6 +81,10 @@ export default function StatsPage() {
                 }))}
                 empty={t('noData')}
               />
+              <h2 className="mt-5 mb-3 font-semibold">{t('statsTypes')}</h2>
+              <Bars rows={stats.types.map((c) => ({ label: t(TYPE_KEY[c.call_type]), n: c.n }))} empty={t('noData')} />
+              <h2 className="mt-5 mb-3 font-semibold">{t('statsCallStatuses')}</h2>
+              <Bars rows={stats.statuses.map((c) => ({ label: t(STATUS_KEY[c.status]), n: c.n }))} empty={t('noData')} />
               <h2 className="mt-5 mb-3 font-semibold">{t('statsClients')}</h2>
               <Bars rows={stats.clients.map((c) => ({ label: t(c.status), n: c.n }))} empty={t('noData')} />
             </section>
