@@ -32,3 +32,48 @@ export interface ClientInput {
 }
 
 export type Stats = Record<ClientStatus | 'all', number>;
+
+export type CallDirection = 'in' | 'out';
+export type CallOutcome = 'answered' | 'no_answer' | 'busy' | 'callback';
+
+export interface Call {
+  id: number;
+  client_id: number | null;
+  caller_name: string | null;
+  phone: string;
+  direction: CallDirection;
+  outcome: CallOutcome;
+  duration_sec: number;
+  topic: string | null;
+  note: string | null;
+  operator_name: string | null;
+  created_at: string;
+}
+
+export interface CallInput {
+  caller_name: string;
+  phone: string;
+  direction: CallDirection;
+  outcome: CallOutcome;
+  duration_min: number;
+  topic: string;
+  note: string;
+}
+
+export interface CallStats {
+  totals: {
+    total: number;
+    today: number;
+    week: number;
+    incoming: number;
+    outgoing: number;
+    answered: number;
+    no_answer: number;
+    busy: number;
+    callback: number;
+    avg_sec: number;
+  };
+  operators: { name: string; n: number; today: number }[];
+  days: { day: string; n: number }[];
+  clients: { status: ClientStatus; n: number }[];
+}

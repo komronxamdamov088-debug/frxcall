@@ -27,6 +27,21 @@ const SCHEMA = [
      updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
   `CREATE INDEX IF NOT EXISTS idx_clients_status ON clients(status)`,
+  `CREATE TABLE IF NOT EXISTS calls (
+     id            SERIAL PRIMARY KEY,
+     client_id     INTEGER REFERENCES clients(id) ON DELETE SET NULL,
+     caller_name   TEXT,
+     phone         TEXT NOT NULL,
+     direction     TEXT NOT NULL DEFAULT 'in' CHECK (direction IN ('in', 'out')),
+     outcome       TEXT NOT NULL DEFAULT 'answered'
+                   CHECK (outcome IN ('answered', 'no_answer', 'busy', 'callback')),
+     duration_sec  INTEGER NOT NULL DEFAULT 0 CHECK (duration_sec >= 0),
+     topic         TEXT,
+     note          TEXT,
+     created_by    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS idx_calls_created ON calls(created_at DESC)`,
 ];
 
 // Har bir serverless instansiya birinchi so'rovda jadvallar borligiga ishonch hosil qiladi.

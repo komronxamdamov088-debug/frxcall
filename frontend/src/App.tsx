@@ -3,6 +3,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LangProvider } from './context/LangContext';
 import LoginPage from './pages/LoginPage';
 import ClientsPage from './pages/ClientsPage';
+import CallsPage from './pages/CallsPage';
+import ScriptsPage from './pages/ScriptsPage';
+import StatsPage from './pages/StatsPage';
 
 function Gate() {
   const { user, ready } = useAuth();
@@ -11,6 +14,9 @@ function Gate() {
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/" element={user ? <ClientsPage /> : <Navigate to="/login" replace />} />
+      <Route path="/calls" element={user ? <CallsPage /> : <Navigate to="/login" replace />} />
+      <Route path="/scripts" element={user ? <ScriptsPage /> : <Navigate to="/login" replace />} />
+      <Route path="/stats" element={user ? <StatsPage /> : <Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -19,6 +19,7 @@ import { formatDate } from '../lib/format';
 import type { Client, ClientStatus, Stats, User } from '../lib/types';
 import { Button, ErrorText, Field, LangSwitch, Modal, ModalActions, StatusBadge, Textarea } from '../components/ui';
 import ClientForm from './ClientForm';
+import NavTabs from '../components/NavTabs';
 
 type Tab = ClientStatus | 'all';
 
@@ -97,6 +98,7 @@ export default function ClientsPage() {
             </Button>
           </div>
         </div>
+        <NavTabs />
       </header>
 
       <main className="mx-auto max-w-6xl px-4 pt-4 pb-28 sm:py-6">
